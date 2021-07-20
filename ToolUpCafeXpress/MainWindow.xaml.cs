@@ -50,7 +50,7 @@ namespace ToolUpCafeXpress
         ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
         ManualResetEvent _pauseEvent = new ManualResetEvent(true);
         Thread _thread;
-       
+        int countTotal = 0;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -183,7 +183,7 @@ namespace ToolUpCafeXpress
                     content = System.IO.File.ReadAllText(p_strPath);
                 }
                 var count = 0;
-                var countTotal = 0;
+               
 
                 driver.Url = "https://members.cafepress.com/mydesigns";
                 driver.Navigate();
@@ -226,7 +226,7 @@ namespace ToolUpCafeXpress
                         break;
 
 
-                    notification.ActionNotifi = "upload: " + excelOb.ImageName;
+                    notification.ActionNotifi = "upload: " + excelOb.ImageName +" Đã up:"+ countTotal;
                     if (Int32.Parse(content) != 0 && Int32.Parse(excelOb.Stt) <= Int32.Parse(content))
                     {
                         continue;
@@ -260,15 +260,20 @@ namespace ToolUpCafeXpress
 
                     Thread.Sleep(20000);
 
+                  driver.FindElement(By.Id("designDisplayName")).SendKeys(text: excelOb.Description);
+                    Thread.Sleep(2000);
+                    driver.FindElement(By.Id("designDescription")).SendKeys(text: excelOb.Description);
+                    Thread.Sleep(2000);
+                    driver.FindElement(By.Id("designDescription")).SendKeys(text: excelOb.Description);
+                    
+                    Thread.Sleep(2000);
 
 
-
-                  
 
                     if (excelOb.Tags != null)
                     {
                         List<string> lstTags = excelOb.Tags.Split(',').ToList();
-                        var inputTag = driver.FindElement(By.Id("search-creatives"));
+                        var inputTag = driver.FindElement(By.Id("designSearchTags"));
                         foreach (string tag in lstTags)
                         {
                             if (tag.Length < 20)
@@ -280,15 +285,13 @@ namespace ToolUpCafeXpress
                         }
 
                     }
-
-                    var inputDecs = driver.FindElement(By.Id("desc-input"));
-                    inputDecs.SendKeys(excelOb.Description);
                     Thread.Sleep(2000);
-                    var checkBox = driver.FindElement(By.XPath("/html/body/div[1]/div/div[4]/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div[3]/div/div[2]/div/input"));
-                    checkBox.Click();
+                    driver.FindElement(By.XPath("/html/body/div[1]/div[1]/div/div/div[1]/div[1]/div[4]/div[2]/div[5]/div[2]/label[1]/input")).Click();
+
+                  
                     Thread.Sleep(2000);
 
-                    var submit = driver.FindElement(By.XPath("/html/body/div[1]/div/div[4]/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div[3]/div/div[2]/button"));
+                    var submit = driver.FindElement(By.XPath("/html/body/div[1]/div[1]/div/div/div[1]/div[1]/div[2]/div[2]/button"));
                     submit.Click();
 
                     Thread.Sleep(10000);
@@ -304,12 +307,7 @@ namespace ToolUpCafeXpress
                         count = 0;
                     }
 
-                    if (countTotal == 200)
-                    {
-                        notification.ActionNotifi = "Đang chờ 1 ngày ";
-                        Thread.Sleep(86400000);
-                        countTotal = 0;
-                    }
+                   
                 }
                 notification.ActionNotifi = "Hết cmnr.";
                 b = false;
@@ -331,7 +329,7 @@ namespace ToolUpCafeXpress
                 a++;
                 System.IO.File.WriteAllText(pathLog, a.ToString());
                 notification.ActionNotifi = "Đã có lỗi xảy ra!";
-                //excuteUpload(lst);
+                excuteUpload(lst);
             }
 
         }

@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ToolUpCafeXpress"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow"
+        Height="450"
+        Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
@@ -14,14 +16,13 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="1">
             <Label    Content="User name:"
-                   HorizontalAlignment="Left"
-                   Margin="10,-1,0,0"
-                   VerticalAlignment="Top" />
+                      HorizontalAlignment="Left"
+                      Margin="10,-1,0,0"
+                      VerticalAlignment="Top" />
             <TextBox x:Name="txtUser"
                      HorizontalAlignment="Left"
                      Height="23"
                      Margin="120,3,0,0"
-                    
                      TextWrapping="Wrap"
                      Text="phamtrongnguyen17@gmail.com"
                      VerticalAlignment="Top"
@@ -40,22 +41,45 @@
                      VerticalAlignment="Top"
                      Width="224" />
             <Button x:Name="button"
-                    Content="Start" Click="Button_Click"
+                    Content="Start"
+                    Click="Button_Click"
                     HorizontalAlignment="Left"
                     Margin="160,126,0,0"
                     VerticalAlignment="Top"
-                    Width="74" Height="25" />
+                    Width="74"
+                    Height="25" />
+
+            <Button x:Name="stopBtn"
+                    Content="Stop"
+                    HorizontalAlignment="Left"
+                    Click="stopBtn_Click"
+                    Margin="269,126,0,0"
+                    VerticalAlignment="Top"
+                    Width="75"
+                    Height="25"
+                    RenderTransformOrigin="1.587,0.72" />
+            <Button x:Name="pauseBtn"
+                    Content="Pause"
+                    HorizontalAlignment="Left"
+                    Click="pauseBtn_Click"
+                    Margin="378,126,0,0"
+                    VerticalAlignment="Top"
+                    Width="75"
+                    Height="25"
+                    RenderTransformOrigin="0.413,0.4" />
+            <Button x:Name="remuseBtn"
+                    Content="Remuse"
+                    HorizontalAlignment="Left"
+                    Click="remuseBtn_Click"
+                    Margin="486,126,0,0"
+                    VerticalAlignment="Top"
+                    Width="75"
+                    Height="25" />
             
-            <Button x:Name="stopBtn" Content="Stop" HorizontalAlignment="Left" Click="stopBtn_Click" Margin="269,126,0,0" VerticalAlignment="Top" Width="75" Height="25" RenderTransformOrigin="1.587,0.72"/>
-            <Button x:Name="pauseBtn" Content="Pause" HorizontalAlignment="Left" Click="pauseBtn_Click" Margin="378,126,0,0" VerticalAlignment="Top" Width="75" Height="25" RenderTransformOrigin="0.413,0.4"/>
-            <Button x:Name="remuseBtn" Content="Remuse" HorizontalAlignment="Left" Click="remuseBtn_Click" Margin="486,126,0,0" VerticalAlignment="Top" Width="75" Height="25"/>
-            <Label x:Name="label" Content="Resize:" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" Width="62"/>
-            <TextBox x:Name="txtX" HorizontalAlignment="Left" Height="23" Margin="120,75,0,0" TextWrapping="Wrap" Text="6000" VerticalAlignment="Top" Width="94" RenderTransformOrigin="0.476,-0.043" />
-            <TextBox x:Name="txtY" HorizontalAlignment="Left" Height="23" Margin="239,75,0,0" TextWrapping="Wrap" Text="9000" VerticalAlignment="Top" Width="105" RenderTransformOrigin="0.476,-0.043"/>
         </Grid>
         <StackPanel Grid.Row="2">
-            <TextBlock Text="{Binding Path=ActionNotifi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  ></TextBlock>
-            <TextBlock Text="{Binding Path=ActionResize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  ></TextBlock>
+            <TextBlock Text="{Binding Path=ActionNotifi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
+            <TextBlock Text="{Binding Path=ActionResize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
         </StackPanel>
 
     </Grid>
