@@ -44,7 +44,7 @@
                     Content="Start"
                     Click="Button_Click"
                     HorizontalAlignment="Left"
-                    Margin="160,126,0,0"
+                    Margin="240,121,0,0"
                     VerticalAlignment="Top"
                     Width="74"
                     Height="25" />
@@ -53,7 +53,7 @@
                     Content="Stop"
                     HorizontalAlignment="Left"
                     Click="stopBtn_Click"
-                    Margin="269,126,0,0"
+                    Margin="349,121,0,0"
                     VerticalAlignment="Top"
                     Width="75"
                     Height="25"
@@ -62,7 +62,7 @@
                     Content="Pause"
                     HorizontalAlignment="Left"
                     Click="pauseBtn_Click"
-                    Margin="378,126,0,0"
+                    Margin="458,121,0,0"
                     VerticalAlignment="Top"
                     Width="75"
                     Height="25"
@@ -71,11 +71,29 @@
                     Content="Remuse"
                     HorizontalAlignment="Left"
                     Click="remuseBtn_Click"
-                    Margin="486,126,0,0"
+                    Margin="568,121,0,0"
                     VerticalAlignment="Top"
                     Width="75"
                     Height="25" />
-            
+            <Button x:Name="btn_download"
+                    Content="Download"
+                    Click="btn_download_Click"
+                    HorizontalAlignment="Left"
+                    Margin="36,121,0,0"
+                    VerticalAlignment="Top"
+                    Width="74"
+                    Height="25"
+                    RenderTransformOrigin="-0.697,0.484" />
+            <Button x:Name="btn_resize"
+                    Content="Resize"
+                    Click="btn_resize_Click"
+                    HorizontalAlignment="Left"
+                    Margin="134,121,0,0"
+                    VerticalAlignment="Top"
+                    Width="74"
+                    Height="25"
+                    RenderTransformOrigin="-0.697,0.484" />
+
         </Grid>
         <StackPanel Grid.Row="2">
             <TextBlock Text="{Binding Path=ActionNotifi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBlock>

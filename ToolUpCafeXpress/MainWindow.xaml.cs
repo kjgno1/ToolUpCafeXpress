@@ -24,46 +24,46 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ToolUpCafePress;
+using Image = System.Drawing.Image;
 
 namespace ToolUpCafeXpress
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        DatabaseContext context = new DatabaseContext();
         public Notification notification = new Notification();
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = notification;
+            DataContext = notification;
+                _lstImg = context.getListNotUploaded();
+                context.UpdateStatus("1332183_1","3");
         }
-        string content = "0";
         string path = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().Location).FullName;
-
-        string pathLog = System.IO.Path.Combine(Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().Location).FullName, "log.txt");
 
         string ProfileFolderPath =  "Profile";
         ChromeDriver driver;
         string userName, password, x, y = "";
-        bool b = true;
+        
         ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
         ManualResetEvent _pauseEvent = new ManualResetEvent(true);
-        Thread _thread;
-        int countTotal = 0;
+        private Thread _thread;
+        private int _countTotal;
+        private List<ImageInfo> _lstImg;
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (driver != null)
             {
-                /*  try
+                  try
                   {
                       driver.Close();
                       driver.Quit();
                   }
                   catch (Exception)
                   {
-                  }*/
+                  }
             }
             else
             {
@@ -89,68 +89,36 @@ namespace ToolUpCafeXpress
                 }
             }
 
-            b = true;
-            _thread = new Thread(doThread);
+            _thread = new Thread(DoThread);
             _thread.Start();
 
         }
 
-        public void doThread()
+        public void DoThread()
         {
            
 
-            this.Dispatcher.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 userName = txtUser.Text;
                 password = txtPassword.Text;
             });
 
+            
+           
 
-            string p_strPath = System.IO.Path.Combine(path, "listing.xlsx");
-            List<ExcelEntity> lst = readXLS(p_strPath);
 
 
             _pauseEvent.WaitOne(Timeout.Infinite);
 
-            /*  if (_shutdownEvent.WaitOne(0))
-                  break;*/
-
-            excuteUpload(lst);
+            excuteUpload(_lstImg);
 
 
 
 
 
         }
-        public List<ExcelEntity> readXLS(string FilePath)
-        {
-            List<ExcelEntity> lst = new List<ExcelEntity>();
-            FileInfo existingFile = new FileInfo(FilePath);
-            using (ExcelPackage package = new ExcelPackage(existingFile))
-            {
-                //get the first worksheet in the workbook
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                int colCount = worksheet.Dimension.End.Column;  //get Column Count
-                int rowCount = worksheet.Dimension.End.Row;     //get row count
-                for (int row = 2; row <= rowCount; row++)
-                {
-
-                    if (worksheet.Cells[row, 1].Value?.ToString().Trim() != null)
-                    {
-                        ExcelEntity excelEntity = new ExcelEntity();
-                        excelEntity.FolderName = worksheet.Cells[row, 1].Value?.ToString().Trim();
-                        excelEntity.ImageName = worksheet.Cells[row, 2].Value?.ToString().Trim();
-                        excelEntity.Title = worksheet.Cells[row, 3].Value?.ToString().Trim();
-                        excelEntity.Description = worksheet.Cells[row, 4].Value?.ToString().Trim();
-                        excelEntity.Tags = worksheet.Cells[row, 5].Value?.ToString().Trim();
-                        excelEntity.Stt = worksheet.Cells[row, 8].Value?.ToString().Trim();
-                        lst.Add(excelEntity);
-                    }
-                }
-            }
-
-            return lst;
-        }
+       
 
         private bool IsElementPresent(By by)
         {
@@ -165,24 +133,18 @@ namespace ToolUpCafeXpress
             }
         }
 
-        public void excuteUpload(List<ExcelEntity> lst)
+        public void excuteUpload(List<ImageInfo> lst)
         {
 
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
-
+            var currentItem = "";
             try
             {
                 notification.ActionNotifi = "Starting!";
-                string p_strPath = System.IO.Path.Combine(path, "log.txt");
-
-
-                FileInfo logFile = new FileInfo(p_strPath);
-                if (logFile.Exists)
-                {
-                    content = System.IO.File.ReadAllText(p_strPath);
-                }
+              
                 var count = 0;
+               
                
 
                 driver.Url = "https://members.cafepress.com/mydesigns";
@@ -218,41 +180,34 @@ namespace ToolUpCafeXpress
 
 
 
-                foreach (var excelOb in lst)
+                foreach (var item in lst)
                 {
                     _pauseEvent.WaitOne(Timeout.Infinite);
-
+                    currentItem = item.Id;
                     if (_shutdownEvent.WaitOne(0))
                         break;
 
 
-                    notification.ActionNotifi = "upload: " + excelOb.ImageName +" Đã up:"+ countTotal;
-                    if (Int32.Parse(content) != 0 && Int32.Parse(excelOb.Stt) <= Int32.Parse(content))
+                    notification.ActionNotifi = "upload: " + item.Name +" Đã up:"+ _countTotal;
+                  /*  if (Int32.Parse(content) != 0 && Int32.Parse(excelOb.Stt) <= Int32.Parse(content))
                     {
                         continue;
-                    }
+                    }*/
 
-                    string p_strPath1 = System.IO.Path.Combine(path, excelOb.FolderName+"\\" + excelOb.ImageName);
+                    string p_strPath1 = System.IO.Path.Combine(path, "img2"+"\\" + item.Id+".png");
                     FileInfo existingFile = new FileInfo(p_strPath1);
                     if (!existingFile.Exists)
                     {
-                        System.IO.File.WriteAllText(pathLog, excelOb.Stt);
+                        context.UpdateStatus(item.Id,"3");
                         continue;
                     }
-
-                    /*  var buttonProfile = driver.FindElement(By.CssSelector("#nav_user_menu"));
-                      buttonProfile.Click();
-                      var buttonUpload = driver.FindElement(By.CssSelector("#mn-manage"));
-                      buttonUpload.Click();*/
-                    
-                      Thread.Sleep(2000);
+                    Thread.Sleep(2000);
                     driver.Url = "https://members.cafepress.com/mydesigns";
                     driver.Navigate();
                     Thread.Sleep(2000);
                     var buttonArtwork = driver.FindElement(By.XPath("/html/body/div[1]/div[9]/div[1]/div[1]/div/div[1]/div[3]"));
                     buttonArtwork.Click();
 
-                   // wait.Until(ExpectedConditions.ElementIsVisible(By.Id("uploadImage")));
                     var inputFile = driver.FindElement(By.Id("uploadImage"));
                     inputFile.SendKeys(p_strPath1);
 
@@ -260,19 +215,16 @@ namespace ToolUpCafeXpress
 
                     Thread.Sleep(20000);
 
-                  driver.FindElement(By.Id("designDisplayName")).SendKeys(text: excelOb.Description);
+                    driver.FindElement(By.Id("designDisplayName")).SendKeys(text: item.Descriptions);
                     Thread.Sleep(2000);
-                    driver.FindElement(By.Id("designDescription")).SendKeys(text: excelOb.Description);
-                    Thread.Sleep(2000);
-                    driver.FindElement(By.Id("designDescription")).SendKeys(text: excelOb.Description);
-                    
+                    driver.FindElement(By.Id("designDescription")).SendKeys(text: item.Descriptions);
                     Thread.Sleep(2000);
 
 
 
-                    if (excelOb.Tags != null)
+                    if (item.Tags != null)
                     {
-                        List<string> lstTags = excelOb.Tags.Split(',').ToList();
+                        List<string> lstTags = item.Tags.Split(',').ToList();
                         var inputTag = driver.FindElement(By.Id("designSearchTags"));
                         foreach (string tag in lstTags)
                         {
@@ -285,21 +237,23 @@ namespace ToolUpCafeXpress
                         }
 
                     }
+
                     Thread.Sleep(2000);
-                    driver.FindElement(By.XPath("/html/body/div[1]/div[1]/div/div/div[1]/div[1]/div[4]/div[2]/div[5]/div[2]/label[1]/input")).Click();
+                    driver.FindElement(By.XPath("/html/body/div[1]/div[1]/div/div/div[1]/div[1]/div[4]/div[2]/div[5]/div[2]/label[1]")).Click();
 
                   
                     Thread.Sleep(2000);
 
-                    var submit = driver.FindElement(By.XPath("/html/body/div[1]/div[1]/div/div/div[1]/div[1]/div[2]/div[2]/button"));
+                    var submit = driver.FindElement(By.ClassName("action-button"));
                     submit.Click();
-
+                    
+                    context.UpdateStatus(item.Id,"1");
+                    
                     Thread.Sleep(10000);
 
-                    System.IO.File.WriteAllText(pathLog, excelOb.Stt);
                     Thread.Sleep(2000);
                     count++;
-                    countTotal++;
+                    _countTotal++;
                     if (count == 50)
                     {
                         notification.ActionNotifi = "Đang chờ 15'";
@@ -307,29 +261,24 @@ namespace ToolUpCafeXpress
                         count = 0;
                     }
 
+                    if (_countTotal == 200)
+                    {
+                        Thread.Sleep(10000000);
+                        _countTotal = 0;
+                    }
+
                    
                 }
                 notification.ActionNotifi = "Hết cmnr.";
-                b = false;
             }
             catch (Exception e)
             {
-              
-
                 Console.WriteLine(e.ToString());
+                context.UpdateStatus(currentItem,"3");
+                //update error
                 _pauseEvent.WaitOne(Timeout.Infinite);
-
-                string Path = System.IO.Path.Combine(path, "log.txt");
-                FileInfo logFile = new FileInfo(Path);
-                if (logFile.Exists)
-                {
-                    content = System.IO.File.ReadAllText(Path);
-                }
-                int a = Int32.Parse(content);
-                a++;
-                System.IO.File.WriteAllText(pathLog, a.ToString());
                 notification.ActionNotifi = "Đã có lỗi xảy ra!";
-                excuteUpload(lst);
+                excuteUpload(context.getListNotUploaded());
             }
 
         }
@@ -338,13 +287,10 @@ namespace ToolUpCafeXpress
 
         private void stopBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Signal the shutdown event
             _shutdownEvent.Set();
 
-            // Make sure to resume any paused threads
             _pauseEvent.Set();
 
-            // Wait for the thread to exit
             _thread.Join();
 
         }
@@ -358,15 +304,43 @@ namespace ToolUpCafeXpress
             _pauseEvent.Set();
         }
 
+        private void btn_download_Click(object sender, RoutedEventArgs e)
+        {
+            new Thread(() =>
+            {
+                Parallel.ForEach(
+                    _lstImg,
+                    new ParallelOptions {MaxDegreeOfParallelism = 10},
+                    x => FileUltil.Download(x.Url,  x.Id + ".png"));
+            }).Start();
+
+        }
+
+        private void btn_resize_Click(object sender, RoutedEventArgs e)
+        {
+            new Thread(() =>
+            {
+                Parallel.ForEach(
+                    _lstImg,
+                    new ParallelOptions {MaxDegreeOfParallelism = 10},
+                    x =>
+                    {
+                        if (File.Exists("img/" + x.Name))
+                        {
+                            Image image = Image.FromFile("img/" + x.Name );
+                            FileUltil.ScaleImage(image, 960,x.Name);
+                        }
+                        
+                    });
+            }).Start();
+        }
+
         public void Stop()
         {
-            // Signal the shutdown event
             _shutdownEvent.Set();
 
-            // Make sure to resume any paused threads
             _pauseEvent.Set();
 
-            // Wait for the thread to exit
             _thread.Join();
         }
 
@@ -384,67 +358,8 @@ namespace ToolUpCafeXpress
 
 
     }
-
-    public class ExcelEntity
-    {
-        string folderName, imageName, title, description, tags, stt, url;
-
-        public string FolderName { get => folderName; set => folderName = value; }
-        public string ImageName { get => imageName; set => imageName = value; }
-        public string Title { get => title; set => title = value; }
-        public string Description { get => description; set => description = value; }
-        public string Tags { get => tags; set => tags = value; }
-        public string Stt { get => stt; set => stt = value; }
-        public string Url { get => url; set => url = value; }
-
-    }
-    public class Notification : INotifyPropertyChanged
-    {
-        protected string action;
-        protected string resize;
-
-        public string ActionNotifi
-        {
-            get { return action; }
-            set
-            {
-                if (action != value)
-                {
-                    action = value;
-                    OnPropertyChanged("ActionNotifi");
-
-                }
-            }
-        }
-
-        public string ActionResize
-        {
-            get { return resize; }
-            set
-            {
-                if (resize != value)
-                {
-                    resize = value;
-                    OnPropertyChanged("ActionResize");
-
-                }
-            }
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyname)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
-            }
-
-        }
-
-
-
-    }
+    
+    
 }
 
 
